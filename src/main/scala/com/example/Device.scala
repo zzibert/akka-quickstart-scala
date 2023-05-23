@@ -1,6 +1,9 @@
 package com.example
 
-import akka.actor.typed.{ ActorRef, Behavior, PostStop, Signal }
+import akka.actor.typed.ActorRef
+import akka.actor.typed.Behavior
+import akka.actor.typed.PostStop
+import akka.actor.typed.Signal
 import akka.actor.typed.scaladsl.AbstractBehavior
 import akka.actor.typed.scaladsl.ActorContext
 import akka.actor.typed.scaladsl.Behaviors
@@ -18,6 +21,8 @@ object Device {
   final case class RecordTemperature(requestId: Long, value: Double, replyTo: ActorRef[TemperatureRecorded])
     extends Command
   final case class TemperatureRecorded(requestId: Long)
+
+  case object Passivate extends Command
 }
 
 class Device(context: ActorContext[Device.Command], groupId: String, deviceId: String)
@@ -39,6 +44,9 @@ class Device(context: ActorContext[Device.Command], groupId: String, deviceId: S
       case ReadTemperature(id, replyTo) =>
         replyTo ! RespondTemperature(id, lastTemperatureReading)
         this
+
+      case Passivate =>
+        Behaviors.stopped
     }
   }
 
