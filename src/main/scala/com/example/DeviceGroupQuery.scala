@@ -47,8 +47,16 @@ class DeviceGroupQuery(
   timers.startSingleTimer(CollectionTimeout, CollectionTimeout, timeout)
 
   private val respondTemperatureAdapter = context.messageAdapter(WrappedRespondTemperature.apply)
+
   private var repliesSoFar = Map.empty[String, TemperatureReading]
   private var stillWaiting = deviceIdToActor.keySet
+
+
+  deviceIdToActor.foreach {
+    case (deviceId, device) =>
+      context.watchWith(device, DeviceTerminated(deviceId))
+      device ! Device.ReadTemperature(0, respondTemperatureAdapter)
+  }
 
   override def onMessage(msg: Command): Behavior[Command] =
     msg match {
@@ -84,11 +92,12 @@ class DeviceGroupQuery(
     respondWhenAllCollected()
   }
 
-
-  deviceIdToActor.foreach {
-    case (deviceId, device) =>
-      context.watchWith(device, DeviceTerminated(deviceId))
-      device ! Device.ReadTemperature(0, respondTemperatureAdapter)
+  private def respondWhenAllCollected(): Behavior[Command] = {
+    if (stillWaiting.isEmpty) {
+      requester ! RespondAllTemperatures(requestId, repliesSoFar)
+      Behaviors.stopped
+    } else {
+      this
+    }
   }
-
 }
