@@ -13,7 +13,7 @@ object HelloWorldBot {
   private def bot(greetingCounter: Int, max: Int): Behavior[HelloWorld.Greeted] =
     Behaviors.receive { (context, message) =>
       val n = greetingCounter + 1
-      context.log.info2("Greeting {} for {}", n, message.whom)
+      println(s"Greeting $n for ${message.whom}")
       if (n == max) {
         Behaviors.stopped
       } else {
