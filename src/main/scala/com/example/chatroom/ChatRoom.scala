@@ -3,6 +3,8 @@ package com.example.chatroom
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.LoggerOps
 import akka.actor.typed.{ ActorRef, ActorSystem, Behavior }
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 object ChatRoom {
   sealed trait RoomCommand
