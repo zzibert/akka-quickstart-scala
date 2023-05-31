@@ -2,7 +2,7 @@ package com.example.lifecycle
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.LoggerOps
-import akka.actor.typed.{ ActorRef, ActorSystem, Behavior, PostStop }
+import akka.actor.typed.{ ActorRef, ActorSystem, Behavior, PostStop, Terminated }
 
 object MasterControlProgram {
   sealed trait Command
@@ -15,18 +15,17 @@ object MasterControlProgram {
         message match {
           case SpawnJob(jobName) =>
             context.log.info("Spawning job {}!", jobName)
-            context.spawn(Job(jobName), name = jobName)
+            val job = context.spawn(Job(jobName), name = jobName)
+            context.watch(job)
             Behaviors.same
-          case GracefulShutdown =>
-            context.log.info("Initiating graceful shutdown...")
-            // Here it can perform graceful stop (possibly asynchronous) and when completed
-            // return `Behaviors.stopped` here or after receiving another message.
-            Behaviors.stopped
         }
       }
       .receiveSignal {
         case (context, PostStop) =>
           context.log.info("Master Control Program stopped")
+          Behaviors.same
+        case (context, Terminated(ref)) =>
+          context.log.info("Job stopped: {}", ref.path.name)
           Behaviors.same
       }
   }
