@@ -3,6 +3,8 @@ package com.example
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.LoggerOps
 import akka.actor.typed.{ ActorRef, ActorSystem, Behavior }
+import com.example.faulttolerance.Protocol._
+import com.example.faulttolerance._
 import com.example.interactionpatterns.Printer
 
 object HelloWorldMain {
@@ -21,13 +23,11 @@ object HelloWorldMain {
     }
 
   def main(args: Array[String]): Unit = {
-    val system = ActorSystem(Printer(), "fire-and-forget-sample")
+    val system = ActorSystem(Boss(), "fire-and-forget-sample")
 
     // note how the system is also the top level actor ref
-    val printer: ActorRef[Printer.PrintMe] = system
+    val boss: ActorRef[Command] = system
 
-    // these are all fire and forget
-    printer ! Printer.PrintMe("message 1")
-    printer ! Printer.PrintMe("not message 2")
+    boss ! Fail("trololo")
   }
 }
