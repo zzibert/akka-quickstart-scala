@@ -9,27 +9,19 @@ class TreeNode(_value: Int = 0, _left: TreeNode = null, _right: TreeNode = null)
 
 object LowestCommonAncestorOfABinarySearchTree {
   def lowestCommonAncestor(root: TreeNode, p: TreeNode, q: TreeNode): TreeNode = {
-    val pTraversal = traverseTo(root, p)
-    val qTraversal = traverseTo(root, q)
-    val pVals = pTraversal.map(_.value)
-    val qVals = qTraversal.map(_.value)
+    val pTraversal = traverseTo(root, p, Seq[TreeNode]())
+    val qTraversal = traverseTo(root, q, Seq[TreeNode]())
 
-    for (node <- pTraversal) {
-      if (qVals.contains(node.value)) {
-        return node
-      }
-    }
-
-    null
+    pTraversal.intersect(qTraversal).head
   }
 
-  def traverseTo(root: TreeNode, target: TreeNode): Seq[TreeNode] = {
+  def traverseTo(root: TreeNode, target: TreeNode, chain: Seq[TreeNode]): Seq[TreeNode] = {
     if (root.value == target.value) {
-      Seq(root)
+      root +: chain
     } else if (root.value < target.value) {
-      traverseTo(root.right, target) :+ root
+      traverseTo(root.right, target, root +: chain)
     } else {
-      traverseTo(root.left, target) :+ root
+      traverseTo(root.left, target, root +: chain)
     }
   }
 }
