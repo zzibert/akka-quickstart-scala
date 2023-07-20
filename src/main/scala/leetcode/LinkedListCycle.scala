@@ -9,18 +9,22 @@ class ListNode(var _x: Int = 0) {
 
 object LinkedListCycle {
   def hasCycle(head: ListNode): Boolean = {
-    val nodes = Map[ListNode, Boolean]()
-    var h = head
+    if (head == null || head.next == null) {
+      false
+    } else {
+      var slow = head
+      var fast = head.next
 
-    while(h != null) {
-      if (nodes.getOrElse(h, false)) {
-        return true
-      } else {
-        nodes += (h -> true)
-        h= h.next
+      while(fast != null && fast.next != null) {
+        if (slow == fast) {
+          return true
+        } else {
+          slow = slow.next
+          fast = fast.next.next
+        }
       }
-    }
 
-    false
+      false
+    }
   }
 }
