@@ -6,21 +6,21 @@ object ImplementTrie {
   class Trie() {
     var value: Char = '0'
     var isWord: Boolean = false
-    var children = mutable.Set[Trie]()
+    var children = mutable.Map[Char, Trie]()
 
     def insert(word: String) {
       if (word != "") {
         val head = word.head
         val tail = word.tail
 
-        children.find(_.value == head) match {
+        children.get(head) match {
           case Some(child) =>
             child.insert(tail)
 
           case None =>
             val child = new Trie()
             child.value = head
-            children.addOne(child)
+            children += (head -> child)
             child.insert(tail)
         }
       } else {
@@ -34,7 +34,7 @@ object ImplementTrie {
       } else {
         val head = word.head
         val tail = word.tail
-        children.find(_.value == head) match {
+        children.get(head) match {
           case Some(child) =>
             child.search(tail)
           case None =>
@@ -49,7 +49,7 @@ object ImplementTrie {
       } else {
         val head = prefix.head
         val tail = prefix.tail
-        children.find(_.value == head) match {
+        children.get(head) match {
           case Some(child) =>
             child.startsWith(tail)
           case None =>
