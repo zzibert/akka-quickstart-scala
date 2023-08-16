@@ -8,48 +8,17 @@ class TreeNode(_value: Int = 0, _left: TreeNode = null, _right: TreeNode = null)
 
 object ValidateBinarySearchTree {
   def isValidBST(root: TreeNode): Boolean = {
+    val values = isValidBSTHelper(root)
 
-    isValidBSTHelper(root,maxValue = Int.MaxValue, minValue = Int.MinValue)
+    values == values.sorted.distinct
   }
 
-  def isValidBSTHelper(root: TreeNode, maxValue: Int, minValue: Int): Boolean = {
+  def isValidBSTHelper(root: TreeNode): List[Int] = {
     if (root == null) {
-      return true
+      Nil
+    } else {
+      isValidBSTHelper(root.left) ::: List(root.value) ::: isValidBSTHelper(root.right)
     }
-
-    if (root.value <= minValue || root.value >= maxValue) {
-      return false
-    }
-
-    val leftMin =
-      if (root.value < minValue) {
-        root.value
-      } else {
-        minValue
-      }
-
-    val leftMax =
-      if (root.value < maxValue) {
-        root.value
-      } else {
-        maxValue
-      }
-
-    val rightMin =
-      if (root.value > minValue) {
-        root.value
-      } else {
-        minValue
-      }
-
-    val rightMax =
-      if (root.value > maxValue) {
-        root.value
-      } else {
-        maxValue
-      }
-
-    isValidBSTHelper(root.left, leftMax, leftMin) && isValidBSTHelper(root.right, rightMax, rightMin)
   }
 
 }
