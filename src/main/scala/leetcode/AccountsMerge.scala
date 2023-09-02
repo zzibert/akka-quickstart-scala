@@ -1,7 +1,7 @@
 package leetcode
 
 import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.{ ArrayBuffer, ListBuffer }
 
 class AccountsMerge {
   def accountsMerge(accounts: List[List[String]]): List[List[String]] = {
@@ -17,20 +17,10 @@ class AccountsMerge {
     }
 
     val emailLists = mutable.ArrayBuffer.from(emailToIndex.values)
+    var _changed = true
 
-    var i = 0
-
-    while(i < (emailLists.length-1)) {
-      var j = i+1
-      while(j < emailLists.length) {
-        if (emailLists(i).intersect(emailLists(j)).length > 0) {
-          emailLists(i) = (emailLists(i) ++ emailLists(j)).distinct
-          emailLists.remove(j)
-        } else {
-          j += 1
-        }
-      }
-      i += 1
+    while(_changed) {
+      _changed = mergeLists(emailLists)
     }
 
     val accountsArray = accounts.toArray
@@ -49,18 +39,24 @@ class AccountsMerge {
     result.toList
   }
 
-//  def mergeLists(emailLists: ) = {
-//    var _changed = false
-//    while (i < (emailLists.length - 1)) {
-//      if (emailLists(i).toSet.intersect(emailLists(i + 1).toSet).size > 0) {
-//        emailLists(i) = emailLists(i) ++ emailLists(i + 1)
-//        emailLists.patch(i + 1, Nil, 1)
-//        _changed = true
-//      } else {
-//        i += 1
-//      }
-//    }
-//
-//    _changed
-//  }
+  def mergeLists(emailLists: ArrayBuffer[ListBuffer[Int]]): Boolean = {
+    var i = 0
+    var _changed = false
+
+    while (i < (emailLists.length - 1)) {
+      var j = i + 1
+      while (j < emailLists.length) {
+        if (emailLists(i).intersect(emailLists(j)).length > 0) {
+          emailLists(i) = (emailLists(i) ++ emailLists(j)).distinct
+          emailLists.remove(j)
+          _changed = true
+        } else {
+          j += 1
+        }
+      }
+      i += 1
+    }
+
+    _changed
+  }
 }
