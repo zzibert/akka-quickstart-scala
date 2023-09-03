@@ -4,8 +4,9 @@ import scala.collection.mutable.ArrayBuffer
 
 object NumberOfProvinces {
   def findCircleNum(isConnected: Array[Array[Int]]): Int = {
-    val roots = ArrayBuffer[Int]()
+    val roots = mutable.ArrayBuffer[Int]()
     val length = isConnected.length
+    var count = length
 
     for (i <- 0 until length) {
       roots.addOne(i)
@@ -17,6 +18,7 @@ object NumberOfProvinces {
     } {
       if (isConnected(i)(j) == 1) {
         if (roots(i) != roots(j)) {
+          count -= 1
           val newRoot = roots(i)
           val replaceRoot = roots(j)
 
@@ -29,6 +31,6 @@ object NumberOfProvinces {
       }
     }
 
-    roots.distinct.length
+    count
   }
 }
