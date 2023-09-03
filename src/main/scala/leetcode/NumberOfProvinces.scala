@@ -1,0 +1,34 @@
+package leetcode
+
+import scala.collection.mutable.ArrayBuffer
+
+object NumberOfProvinces {
+  def findCircleNum(isConnected: Array[Array[Int]]): Int = {
+    val roots = ArrayBuffer[Int]()
+    val length = isConnected.length
+
+    for (i <- 0 until length) {
+      roots.addOne(i)
+    }
+
+    for {
+      i <- 0 until length
+      j <- 0 until length
+    } {
+      if (isConnected(i)(j) == 1) {
+        if (roots(i) != roots(j)) {
+          val newRoot = roots(i)
+          val replaceRoot = roots(j)
+
+          for (k <- 0 until length) {
+            if (roots(k) == replaceRoot) {
+              roots(k) = newRoot
+            }
+          }
+        }
+      }
+    }
+
+    roots.distinct.length
+  }
+}
