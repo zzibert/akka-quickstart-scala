@@ -1,16 +1,15 @@
 package leetcode
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 object SmallestStringWithSwaps {
   def smallestStringWithSwaps(s: String, pairs: List[List[Int]]): String = {
     val length = s.length
-    val roots = ArrayBuffer[Int]()
+    val roots = Array.fill(length)(0)
     val result: Array[Char] = Array.fill(length)(' ')
 
     for (i <- 0 until length) {
-      roots.addOne(i)
+      roots(i) = i
     }
 
     pairs foreach { pair =>
@@ -29,19 +28,19 @@ object SmallestStringWithSwaps {
       }
     }
 
-    val groups = mutable.Map[Int, ArrayBuffer[Int]]()
+    val groups = mutable.Map[Int, Array[Int]]()
 
-    roots.zipWithIndex foreach {
+    roots.zipWithIndex.view foreach {
       case (group, index) =>
-        val buffer = groups.getOrElseUpdate(group, ArrayBuffer[Int]())
-        buffer.addOne(index)
+        val buffer = groups.getOrElseUpdate(group, Array[Int]())
+        groups(group) = buffer :+ index
     }
 
-    groups.values foreach { indices =>
+    groups.values.view foreach { indices =>
       val characters = indices.view.map(c => s(c)).sorted
       val sortedIndices = indices.sorted
 
-      sortedIndices.zip(characters) foreach {
+      sortedIndices.view.zip(characters) foreach {
         case (i, c) =>
           result(i) = c
       }
