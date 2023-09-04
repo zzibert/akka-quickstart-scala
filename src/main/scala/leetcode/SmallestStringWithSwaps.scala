@@ -38,10 +38,10 @@ object SmallestStringWithSwaps {
     }
 
     groups.values foreach { indices =>
-      val characters = indices.map(c => s(c)).sorted
+      val characters = indices.view.map(c => s(c)).sorted
       val sortedIndices = indices.sorted
 
-      sortedIndices.toSeq.zip(characters.toSeq) foreach {
+      sortedIndices.zip(characters) foreach {
         case (i, c) =>
           result(i) = c
       }
