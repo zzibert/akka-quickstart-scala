@@ -64,7 +64,7 @@ object EvaluateDivision {
     val eval2 = eval(variable2, 1, parents)
 
     if (eval1._2 != eval2._2) {
-      parents += (eval2._2 -> ((eval2._1 / multiplier) * eval1._1, eval1._2))
+      parents += (eval1._2 -> ((multiplier * eval2._1) / eval1._1, eval2._2))
     }
   }
 
