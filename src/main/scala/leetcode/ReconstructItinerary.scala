@@ -1,29 +1,46 @@
 package leetcode
 
-import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ ArrayBuffer, ListBuffer }
 
 object ReconstructItinerary {
   def findItinerary(tickets: List[List[String]]): List[String] = {
-    val itineraries = mutable.Map[String, ArrayBuffer[String]]()
+    var itineraries = Map[String, List[String]]()
     val count = tickets.length
+    val result = ListBuffer[List[String]]()
 
     tickets foreach { ticket =>
-      val buffer = itineraries.getOrElseUpdate(ticket(0), ArrayBuffer[String]())
-      buffer.addOne(ticket(1)).sortInPlace()
+      val buffer = itineraries.getOrElse(ticket(0), List[String]())
+      itineraries += (ticket(0) -> (ticket(1) :: buffer).sorted)
     }
 
-    itineraryFinder(Array("JFK"), itineraries)
+    itineraryFinder(Array("JFK"), itineraries, count, result)
+
+    if (result.isEmpty) {
+      List("")
+    } else {
+      result.head
+    }
   }
 
-  def itineraryFinder(path: Array[String], itineraries: mutable.Map[String, ArrayBuffer[String]]): List[String] = {
-    val possibleFlights = itineraries.getOrElse(path.last, ArrayBuffer.empty)
-    if (possibleFlights.isEmpty) {
-      path.toList
+  def itineraryFinder(path: Array[String], itineraries: Map[String, List[String]], count: Int, result: ListBuffer[List[String]]): Boolean = {
+    val possibleFlights = itineraries.getOrElse(path.last, List.empty)
+
+    if (count == 0) {
+      result.addOne(path.toList)
+      true
+    } else if (possibleFlights.isEmpty) {
+      false
     } else {
-      val nextFlight = possibleFlights.head
-      possibleFlights.dropInPlace(1)
-      itineraryFinder(path.appended(nextFlight), itineraries)
+      possibleFlights.zipWithIndex foreach {
+        case (flight, index) =>
+          val newPossibleFlights = ArrayBuffer.from(possibleFlights)
+          newPossibleFlights.remove(index)
+          val newItenerary = itineraries + (path.last -> newPossibleFlights.toList)
+          if (itineraryFinder(path.appended(flight), newItenerary, count - 1, result)) {
+            return true
+          }
+      }
+      false
     }
   }
 }
