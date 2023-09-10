@@ -1,11 +1,11 @@
 package leetcode
 
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.ArrayBuffer
 
 object MinCostToConnectAllPoints {
   def minCostConnectPoints(points: Array[Array[Int]]): Int = {
     val connected = Array.fill(points.length)(false)
-    val distances = ListBuffer[(Int, Int, Int)]()
+    val distances = ArrayBuffer[(Int, Int, Int)]()
     val edges = points.length-1
     var numberOfEdges = 0
     var weight = 0
@@ -33,16 +33,22 @@ object MinCostToConnectAllPoints {
 
     sortedDistances.dropInPlace(1)
 
+    var index = 0
     while (numberOfEdges < edges) {
-      val edge = sortedDistances.head
+      val edge = sortedDistances(index)
       if (canBeConnected(edge, connected)) {
         weight += edge._1
         numberOfEdges += 1
         connected(edge._2) = true
         connected(edge._3) = true
+        sortedDistances.remove(index)
+        index = 0
+        if (numberOfEdges == edges) {
+          return weight
+        }
+      } else {
+        index += 1
       }
-
-      sortedDistances.dropInPlace(1)
     }
 
     weight
