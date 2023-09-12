@@ -5,23 +5,19 @@ import scala.collection.mutable
 object DeleteAndEarn {
   def deleteAndEarn(nums: Array[Int]): Int = {
     val totalPoints = mutable.Map[Int, Int]()
-    var result = 0
+    val cumulativePoints = mutable.Map[Int, Int]()
 
     nums foreach { number =>
       totalPoints += (number -> (totalPoints.getOrElse(number, 0)+number))
     }
 
-    val numbers = totalPoints.toList.view.sortBy(_._2).map(_._1).toList.reverse
+    val numbers = nums.distinct.sorted
 
-    numbers foreach { number =>
-      if (totalPoints.getOrElse(number, 0) >= (totalPoints.getOrElse(number-1, 0) + totalPoints.getOrElse(number+1, 0))) {
-        result += totalPoints.getOrElse(number, 0)
-        totalPoints -= (number)
-        totalPoints -= (number-1)
-        totalPoints -= (number+1)
-      }
+    for (number <- numbers.head to numbers.last) {
+      val maxPoints = Math.max(cumulativePoints.getOrElse(number-2, 0), cumulativePoints.getOrElse(number-3, 0))
+      cumulativePoints += (number -> (totalPoints.getOrElse(number, 0)+maxPoints))
     }
 
-    result
+    Math.max(cumulativePoints.getOrElse(numbers.last, 0), cumulativePoints.getOrElse(numbers.last - 1, 0))
   }
 }
