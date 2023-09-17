@@ -5,11 +5,10 @@ import scala.collection.mutable
 object MinimumHeightTrees {
   def findMinHeightTrees(n: Int, edges: Array[Array[Int]]): List[Int] = {
     val destinations = mutable.Map[Int, mutable.ArrayBuffer[Int]]()
+    val maxHeights = mutable.Map[(Int, Int), Int]()
     val maxHeightPerVertices = Array.fill(n)(0)
     var globalMin = Int.MaxValue
     val count = mutable.ListBuffer[Int]()
-
-    // TODO: Store previous max heights per vertices
 
     edges foreach { edge =>
       val first = edge(0)
@@ -23,7 +22,7 @@ object MinimumHeightTrees {
     }
 
     for (i <- 0 until n) {
-      val maxHeight = findMaxHeight(i, List(i), destinations, 0)
+      val maxHeight = findMaxHeight(i, List(i), maxHeights, destinations, 0)
       maxHeightPerVertices(i) = maxHeight
       if (maxHeight < globalMin) {
         globalMin = maxHeight
@@ -40,13 +39,22 @@ object MinimumHeightTrees {
     count.toList
   }
 
-  def findMaxHeight(root: Int, visited: List[Int], destinations: mutable.Map[Int, mutable.ArrayBuffer[Int]], height: Int): Int = {
+  def findMaxHeight(root: Int, visited: List[Int], maxHeights: mutable.Map[(Int, Int), Int],  destinations: mutable.Map[Int, mutable.ArrayBuffer[Int]], height: Int): Int = {
     val potentials = destinations.getOrElse(root, mutable.ArrayBuffer.empty).filterNot(visited.contains)
 
     if (potentials.isEmpty) {
       height
     } else {
-      val heights = potentials.map(vertices => findMaxHeight(vertices, visited.appended(vertices), destinations, height+1))
+      val heights =
+        potentials map { vertices =>
+          maxHeights.get((root, vertices)) match {
+            case Some(result) => result+height
+            case None =>
+              val result = findMaxHeight(vertices, visited.appended(vertices), maxHeights, destinations, 1)
+              maxHeights += ((root, vertices) -> result)
+              height+result
+          }
+        }
       heights.max
     }
   }
