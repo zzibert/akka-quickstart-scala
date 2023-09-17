@@ -22,7 +22,7 @@ object MinimumHeightTrees {
     }
 
     for (i <- 0 until n) {
-      val maxHeight = findMaxHeight(i, List(i), maxHeights, destinations, 0)
+      val maxHeight = findMaxHeight(i, i, maxHeights, destinations, 0)
       maxHeightPerVertices(i) = maxHeight
       if (maxHeight < globalMin) {
         globalMin = maxHeight
@@ -39,8 +39,9 @@ object MinimumHeightTrees {
     count.toList
   }
 
-  def findMaxHeight(root: Int, visited: List[Int], maxHeights: mutable.Map[(Int, Int), Int],  destinations: mutable.Map[Int, mutable.ArrayBuffer[Int]], height: Int): Int = {
-    val potentials = destinations.getOrElse(root, mutable.ArrayBuffer.empty).filterNot(visited.contains)
+  // TODO: Remove visited
+  def findMaxHeight(root: Int, rootParent: Int, maxHeights: mutable.Map[(Int, Int), Int],  destinations: mutable.Map[Int, mutable.ArrayBuffer[Int]], height: Int): Int = {
+    val potentials = destinations.getOrElse(root, mutable.ArrayBuffer.empty).filterNot(_ == rootParent)
 
     if (potentials.isEmpty) {
       height
@@ -50,7 +51,7 @@ object MinimumHeightTrees {
           maxHeights.get((root, vertices)) match {
             case Some(result) => result+height
             case None =>
-              val result = findMaxHeight(vertices, visited.appended(vertices), maxHeights, destinations, 1)
+              val result = findMaxHeight(vertices, root, maxHeights, destinations, 1)
               maxHeights += ((root, vertices) -> result)
               height+result
           }
