@@ -5,9 +5,7 @@ import scala.collection.mutable
 object MinimumHeightTrees {
   def findMinHeightTrees(n: Int, edges: Array[Array[Int]]): List[Int] = {
     val destinations = mutable.Map[Int, Array[Int]]()
-    val maxHeights = mutable.Map[(Int, Int), Int]()
-    val maxHeightPerVertices = Array.fill(n)(0)
-    var globalMin = Int.MaxValue
+    val maxHeightPerVertices = mutable.Map[Int, Int]()
     val count = mutable.ListBuffer[Int]()
 
     edges foreach { edge =>
@@ -22,39 +20,40 @@ object MinimumHeightTrees {
     }
 
     for (i <- 0 until n) {
-      val maxHeight = findMaxHeight(i, i, maxHeights, destinations, 0)
-      maxHeightPerVertices(i) = maxHeight
-      if (maxHeight < globalMin) {
-        globalMin = maxHeight
-      }
+      findMaxHeight(i, i, i, maxHeightPerVertices, destinations, 0)
     }
 
-    maxHeightPerVertices.zipWithIndex foreach {
-      case (height, index) =>
+    val globalMin = maxHeightPerVertices.values.min
+
+    maxHeightPerVertices.toList foreach {
+      case (node, height) =>
         if (height == globalMin) {
-          count.addOne(index)
+          count.addOne(node)
         }
     }
 
     count.toList
   }
-  def findMaxHeight(root: Int, rootParent: Int, maxHeights: mutable.Map[(Int, Int), Int],  destinations: mutable.Map[Int, Array[Int]], height: Int): Int = {
-    val potentials = destinations.getOrElse(root, Array.empty).filterNot(_ == rootParent)
+  def findMaxHeight(origin: Int, root: Int, rootParent: Int, maxHeightPerVertices: mutable.Map[Int, Int],  destinations: mutable.Map[Int, Array[Int]], height: Int): Unit = {
+    maxHeightPerVertices.get(root) match {
+      case Some(maxHeight) =>
+        val currentHeight = height + maxHeight
+        if (maxHeightPerVertices.get(origin).forall(_ < currentHeight)) {
+          maxHeightPerVertices += (origin -> currentHeight)
+        }
 
-    if (potentials.isEmpty) {
-      height
-    } else {
-      val heights =
-        potentials map { vertices =>
-          maxHeights.get((root, vertices)) match {
-            case Some(result) => result+height
-            case None =>
-              val result = findMaxHeight(vertices, root, maxHeights, destinations, 1)
-              maxHeights += ((root, vertices) -> result)
-              height+result
+      case None =>
+        val potentials = destinations.getOrElse(root, Array.empty).filterNot(_ == rootParent)
+
+        if (potentials.isEmpty) {
+          if (maxHeightPerVertices.get(origin).forall(_ < height)) {
+            maxHeightPerVertices += (origin -> height)
+          }
+        } else {
+          potentials foreach { vertices =>
+            findMaxHeight(origin, vertices, root, maxHeightPerVertices, destinations, height + 1)
           }
         }
-      heights.max
     }
   }
 }
