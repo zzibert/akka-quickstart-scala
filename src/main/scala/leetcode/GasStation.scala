@@ -5,9 +5,11 @@ object GasStation {
     val numberOfStations = gas.length
 
     val possibleStartingPositions =
-      Array.from(0 until numberOfStations) filter { station =>
-        gas(station) >= cost(station)
-      }
+      Array.from(0 until numberOfStations).view
+        .filter(station => gas(station) >= cost(station))
+        .toSeq
+        .sortBy(station => gas(station))
+        .reverse
 
     possibleStartingPositions foreach { origin =>
       if (canCompleteCircuitHelper(origin, origin, gas(origin), numberOfStations, gas, cost)) {
