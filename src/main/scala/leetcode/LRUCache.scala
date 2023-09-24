@@ -4,11 +4,13 @@ import scala.collection.mutable
 
 class LRUCache(_capacity: Int) {
     val cache = mutable.Map[Int, (Int, Int)]()
+    val used = mutable.ArrayBuffer[(Int, Int)]()
     var counter = 0
   def get(key: Int): Int = {
     cache.get(key) match {
       case Some((value, _)) =>
         cache += (key -> (value, counter))
+        used.addOne((key, counter))
         counter += 1
         value
       case None =>
@@ -18,12 +20,30 @@ class LRUCache(_capacity: Int) {
 
   def put(key: Int, value: Int) {
     cache += (key -> (value, counter))
+    used.addOne((key, counter))
     counter += 1
 
     if (cache.size > _capacity) {
-      val leastUsedKey = cache.toList.sortBy(keyValue => keyValue._2._2).head._1
+      val leastUsedKey = findLeastUsedKey(cache, used)
       cache -= leastUsedKey
     }
+  }
+
+  def findLeastUsedKey(cache: mutable.Map[Int, (Int, Int)], used: mutable.ArrayBuffer[(Int, Int)]): Int = {
+    for (i <- 0 until used.length) {
+      val (usedKey, usedCounter) = used(i)
+      cache.get(usedKey) match {
+        case Some((_, counter)) =>
+          if (counter == usedCounter) {
+            used.dropInPlace(i+1)
+            return usedKey
+          }
+
+        case _ =>
+      }
+    }
+
+    0
   }
 
 }
