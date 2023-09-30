@@ -2,23 +2,22 @@ package leetcode
 
 object MinimumSizeSubarraySum {
   def minSubArrayLen(target: Int, nums: Array[Int]): Int = {
-    var length = 1
-
-    while (length <= nums.length) {
-      var summa = nums.take(length).sum
-      var index = 0
-      if (summa >= target) {
-        return length
-      }
-      for (i <- length until nums.length) {
+    for (length <- 1 to nums.length) {
+      var summa = 0
+      for (i <- 0 until length) {
         summa += nums(i)
-        summa -= nums(index)
-        index += 1
+      }
+
+      for (i <- length until nums.length) {
         if (summa >= target) {
           return length
         }
+        summa -= nums(i-length)
+        summa += nums(i)
       }
-      length += 1
+      if (summa >= target) {
+        return length
+      }
     }
 
     0
