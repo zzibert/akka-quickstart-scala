@@ -105,4 +105,8 @@ object KthLargestElementInAnArray {
       (length / 2) - 1
     }
   }
+
+  def main(args: Array[String]): Unit = {
+
+  }
 }

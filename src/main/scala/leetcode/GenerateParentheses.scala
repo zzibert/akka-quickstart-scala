@@ -1,3 +1,3 @@
-package leetcode object GenerateParentheses {
-
-}
+//package leetcode object GenerateParentheses {
+//
+//}

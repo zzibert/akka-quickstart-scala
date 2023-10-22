@@ -1,3 +1,3 @@
-package leetcode object NextPermutation {
-
-}
+//package leetcode object NextPermutation {
+//
+//}
