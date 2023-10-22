@@ -38,10 +38,21 @@ object KthLargestElementInAnArray {
     }
 
     def delete(): Unit = {
-      nodes(0).value = nodes(length-1).value
-      nodes.remove(length-1)
+      nodes(0).value = nodes(length - 1).value
+      deleteLast()
+      nodes.remove(length - 1)
 
       swapIfSmaller(nodes(0))
+    }
+
+    def deleteLast(): Unit = {
+      val parentIndex = getParent(length)
+      val parent = nodes(parentIndex)
+      if (parent.right != null) {
+        parent.right = null
+      } else {
+        parent.left = null
+      }
     }
 
     def getFirst(): Int = {
@@ -53,7 +64,7 @@ object KthLargestElementInAnArray {
     }
 
     def swapIfBigger(child: TreeNode, index: Int): Unit = {
-      val parentIndex = getParent(index+1)
+      val parentIndex = getParent(index + 1)
       if (parentIndex >= 0) {
         val parent = nodes(parentIndex)
         if (parent.value < child.value) {
@@ -76,8 +87,10 @@ object KthLargestElementInAnArray {
 
       List(leftOption, rightOption).flatten match {
         case List(child) =>
-          swapValues(node, child)
-          swapIfSmaller(child)
+          if (child.value > node.value) {
+            swapValues(node, child)
+            swapIfSmaller(child)
+          }
 
         case List(left, right) =>
           val bigger =
@@ -102,7 +115,14 @@ object KthLargestElementInAnArray {
     }
 
     def getParent(length: Int): Int = {
-      (length / 2) - 1
+      Math.max((length / 2) - 1, 0)
+    }
+  }
+
+  def traverse(node: TreeNode): Unit = {
+    if (node != null) {
+      traverse(node.left)
+      traverse(node.right)
     }
   }
 
