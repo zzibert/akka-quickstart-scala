@@ -24,14 +24,19 @@ class TrappingRainWater {
   }
 
   def findRight(left: Int, heights: Array[Int]): Int = {
+    var index = -1
+    var biggest = 0
     val leftHeight = heights(left)
     for (i <- left+1 until heights.length) {
       if (leftHeight <= heights(i)) {
         return i
+      } else if (biggest < heights(i)) {
+        biggest = heights(i)
+        index = i
       }
     }
 
-    -1
+    index
   }
 
   def calculateWater(left: Int, right: Int, heights: Array[Int]): Int = {
