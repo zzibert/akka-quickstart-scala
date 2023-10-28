@@ -1,29 +1,28 @@
 package leetcode
 
-import scala.collection.mutable
 
 object GenerateParentheses {
   def generateParenthesis(n: Int): List[String] = {
-    val queue = mutable.Queue[String]()
-    var counter = 1
 
     if (n < 1) {
       Nil
     } else {
-      queue.enqueue("()")
-      while (counter < n) {
-        val length = queue.length
-        for (_ <- 0 until length) {
-          val parentheses = queue.dequeue()
-          for (i <- 0 until parentheses.length) {
-            val newValue = parentheses.take(i) + "()" + parentheses.drop(i)
-            queue.enqueue(newValue)
-          }
-        }
-        counter += 1
-      }
+      generateParenthesesHelper(n, List["()"])
+    }
+  }
 
-      queue.toList.distinct
+  def generateParenthesesHelper(n: Int, parentheses: String): List[String] = {
+    if (n > 1) {
+      val length = parentheses.length
+      val results =
+        for {
+          i <- 0 until length
+        } yield {
+          generateParenthesesHelper(n-1, parentheses.take(i) + "()" + parentheses.drop(i))
+        }
+      results.view.flatten.toList.distinct
+    } else {
+      List(parentheses)
     }
   }
 }
