@@ -1,6 +1,7 @@
 package leetcode
 
 import scala.collection.mutable
+import scala.util.Random
 
 object KthLargestElementInAnArray {
   def findKthLargest(nums: Array[Int], k: Int): Int = {
@@ -35,14 +36,21 @@ object KthLargestElementInAnArray {
       }
 
       swapIfBigger(node, length)
+//      println(s"Inserted: ${value}")
+//      traverse(nodes)
+//      println()
     }
 
     def delete(): Unit = {
-      nodes(0).value = nodes(length - 1).value
+      val value = nodes(length - 1).value
+      nodes(0).value = value
       deleteLast()
       nodes.remove(length - 1)
 
       swapIfSmaller(nodes(0))
+//      println(s"Deleted: ${value}")
+//      traverse(nodes)
+//      println()
     }
 
     def deleteLast(): Unit = {
@@ -64,12 +72,12 @@ object KthLargestElementInAnArray {
     }
 
     def swapIfBigger(child: TreeNode, index: Int): Unit = {
-      val parentIndex = getParent(index + 1)
+      val parentIndex = getParent(index)
       if (parentIndex >= 0) {
         val parent = nodes(parentIndex)
         if (parent.value < child.value) {
           swapValues(parent, child)
-          swapIfBigger(parent, parentIndex)
+          swapIfBigger(parent, parentIndex+1)
         }
       }
     }
@@ -114,19 +122,28 @@ object KthLargestElementInAnArray {
       parent.value = temp
     }
 
-    def getParent(length: Int): Int = {
-      Math.max((length / 2) - 1, 0)
+    def getParent(index: Int): Int = {
+      (index / 2) - 1
     }
   }
 
-  def traverse(node: TreeNode): Unit = {
-    if (node != null) {
-      traverse(node.left)
-      traverse(node.right)
-    }
-  }
+//  def traverse(nodes: mutable.ArrayBuffer[TreeNode]): Unit = {
+//    for (i <- 0 until nodes.length) {
+//      print(s"${nodes(i).value} ")
+//    }
+//    println()
+//  }
 
   def main(args: Array[String]): Unit = {
+//    val nums = Array(164, 6892, 8650, 7176, 767, 3527, 6835, 6215, 3600, 4390, 5820, 1406, 1866, 8651, 2452, 4442, 3569, 9450, 8219, 3778, 3749, 85, 801, 7769, 7604, 4393)
+    val nums = Array(3,2,1,5,6,4)
+    val reversed = nums.sorted.reverse
 
+//    for (i <- 1 until reversed.length) {
+      print(s"reversed: ${reversed(1)} result: ${findKthLargest(nums, 2)}")
+//      println()
+//    }
+
+//    findKthLargest(nums, 12)
   }
 }
