@@ -1,14 +1,13 @@
 package leetcode
 
 import scala.collection.mutable
-import scala.util.Random
 
 object KthLargestElementInAnArray {
   def findKthLargest(nums: Array[Int], k: Int): Int = {
     val root = new TreeNode(nums.head)
-    val heap = new Heap(root)
+    val heap = new Heap()
 
-    for (i <- 1 until nums.length) {
+    for (i <- 0 until nums.length) {
       heap.insert(nums(i))
     }
 
@@ -19,26 +18,28 @@ object KthLargestElementInAnArray {
     heap.getFirst()
   }
 
-  class Heap(root: TreeNode) {
-    private val nodes = mutable.ArrayBuffer[TreeNode](root)
+  class Heap() {
+    private val nodes = mutable.ArrayBuffer[TreeNode]()
 
     def length = nodes.length
 
     def insert(value: Int): Unit = {
-      val node = new TreeNode(value)
-      nodes.addOne(node)
-      val parentIndex = getParent(length)
-      val parent = nodes(parentIndex)
-      if (parent.left == null) {
-        parent.left = node
+      if (nodes.isEmpty) {
+        val node = new TreeNode(value)
+        nodes.addOne(node)
       } else {
-        parent.right = node
-      }
+        val node = new TreeNode(value)
+        nodes.addOne(node)
+        val parentIndex = getParent(length)
+        val parent = nodes(parentIndex)
+        if (parent.left == null) {
+          parent.left = node
+        } else {
+          parent.right = node
+        }
 
-      swapIfBigger(node, length)
-//      println(s"Inserted: ${value}")
-//      traverse(nodes)
-//      println()
+        swapIfBigger(node, length)
+      }
     }
 
     def delete(): Unit = {
@@ -126,13 +127,6 @@ object KthLargestElementInAnArray {
       (index / 2) - 1
     }
   }
-
-//  def traverse(nodes: mutable.ArrayBuffer[TreeNode]): Unit = {
-//    for (i <- 0 until nodes.length) {
-//      print(s"${nodes(i).value} ")
-//    }
-//    println()
-//  }
 
   def main(args: Array[String]): Unit = {
 //    val nums = Array(164, 6892, 8650, 7176, 767, 3527, 6835, 6215, 3600, 4390, 5820, 1406, 1866, 8651, 2452, 4442, 3569, 9450, 8219, 3778, 3749, 85, 801, 7769, 7604, 4393)
