@@ -127,7 +127,7 @@ object TaskScheduler {
     }
 
     def addTask(task: Char): Unit = {
-      previousTasks.drop(1).addOne(task)
+      previousTasks.dropInPlace(1).addOne(task)
       counter += 1
     }
   }
