@@ -5,13 +5,12 @@ import scala.collection.mutable
 class LFUCache(_capacity: Int) {
   val nodes = mutable.Map[Int, KeyNode]()
 
-  var minimumChain: Option[KeyNode] = None
+  val minimumChain = mutable.ArrayBuffer[KeyNode]()
 
   case class KeyNode(
       var key: Int,
       var value: Int,
       var counter: Int = 1,
-      var previous: KeyNode = null,
       var next: KeyNode = null,
   )
 
@@ -39,15 +38,10 @@ class LFUCache(_capacity: Int) {
         if (size < _capacity) {
           addNode(key, value)
         } else {
-          minimumChain foreach { deleted =>
-            nodes -= deleted.key
-            if (deleted.next != null) {
-              minimumChain = Some(deleted.next)
-            } else {
-              minimumChain = None
-            }
-            addNode(key, value)
-          }
+          val deleted = minimumChain.head
+          nodes -= deleted.key
+          minimumChain.remove(0)
+          addNode(key, value)
         }
     }
   }
@@ -55,14 +49,10 @@ class LFUCache(_capacity: Int) {
   def addNode(key: Int, value: Int): Unit = {
     val node = KeyNode(key = key, value = value)
     nodes += (key -> node)
-    minimumChain match {
-      case Some(head) =>
-        head.previous = node
-        node.next = head
-        minimumChain = Some(node)
-      case None =>
-        minimumChain = Some(node)
+    if (minimumChain.length > 0) {
+      node.next = minimumChain.head
     }
+    minimumChain.insert(0, node)
     swap(node, node.next)
   }
 
