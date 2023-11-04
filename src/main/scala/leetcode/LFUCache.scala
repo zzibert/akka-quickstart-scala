@@ -3,66 +3,94 @@ package leetcode
 import scala.collection.mutable
 
 class LFUCache(_capacity: Int) {
+  val nodes = mutable.Map[Int, KeyNode]()
 
-  case class Record(value: Int, counter: Int)
-  case class Used(key: Int, counter: Int)
+  var minimumChain: Option[KeyNode] = None
 
-  val values = mutable.Map[Int, Record]()
-  val used = mutable.Stack[Used]()
+  case class KeyNode(
+      var key: Int,
+      var value: Int,
+      var counter: Int = 1,
+      var previous: KeyNode = null,
+      var next: KeyNode = null,
+  )
 
+  def size: Int = nodes.size
 
   def get(key: Int): Int = {
-    values.get(key) match {
-      case Some(record) =>
-        val newCounter = record.counter+1
-        addLeastFrequent(key, newCounter)
-        values += (key -> record.copy(counter = newCounter))
-        record.value
+    nodes.get(key) match {
+      case Some(node) =>
+        val result = node.value
+        increment(node)
+        result
 
-      case _ => -1
+      case None =>
+        -1
     }
   }
 
-  def put(key: Int, value: Int) {
-    values.get(key) match {
-      case Some(record) =>
-        val newCounter = record.counter+1
-        addLeastFrequent(key, newCounter)
-        values += (key -> Record(value, newCounter))
+  def put(key: Int, value: Int): Unit = {
+    nodes.get(key) match {
+      case Some(node) =>
+        node.value = value
+        increment(node)
 
       case None =>
-        if (values.size < _capacity) {
-          addElement(key, value)
+        if (size < _capacity) {
+          addNode(key, value)
         } else {
-          removeLeastFrequent()
-          addElement(key, value)
+          minimumChain foreach { deleted =>
+            nodes -= deleted.key
+            if (deleted.next != null) {
+              minimumChain = Some(deleted.next)
+            } else {
+              minimumChain = None
+            }
+            addNode(key, value)
+          }
         }
     }
   }
 
-  def addElement(key: Int, value: Int): Unit = {
-    values += (key -> Record(value, 1))
-    addLeastFrequent(key, 1)
+  def addNode(key: Int, value: Int): Unit = {
+    val node = KeyNode(key = key, value = value)
+    nodes += (key -> node)
+    minimumChain match {
+      case Some(head) =>
+        head.previous = node
+        node.next = head
+        minimumChain = Some(node)
+      case None =>
+        minimumChain = Some(node)
+    }
+    swap(node, node.next)
   }
 
-  def addLeastFrequent(key: Int, counter: Int): Unit = {
-    if (used.isEmpty || counter <= used.head.counter) {
-      used.push(Used(key, counter))
+  def increment(node: KeyNode): Unit = {
+    node.counter += 1
+    swap(node, node.next)
+  }
+
+  def swap(node: KeyNode, next: KeyNode): Unit = {
+    if (next != null && node.counter >= next.counter) {
+      val tempKey = node.key
+      val tempVal = node.value
+      val tempCounter = node.counter
+
+      node.key = next.key
+      node.value = next.value
+      node.counter = next.counter
+
+      next.key = tempKey
+      next.value = tempVal
+      next.counter = tempCounter
+
+
+      nodes += (node.key -> node)
+      nodes += (next.key -> next)
+
+      swap(next, next.next) // iffy
     }
   }
 
-  def removeLeastFrequent(): Unit = {
-    var removeLeastFrequent = false
-    while (!removeLeastFrequent) {
-      val leastFrequent = used.pop()
-      values.get(leastFrequent.key) match {
-        case Some(record) =>
-          if (record.counter == leastFrequent.counter || used.isEmpty) {
-            values -= leastFrequent.key
-            removeLeastFrequent = true
-          }
-        case None =>
-      }
-    }
-  }
 }
