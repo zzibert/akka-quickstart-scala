@@ -35,7 +35,7 @@ object DesignFileSystem {
       }
 
       def find(path: Array[String]): Int = {
-        if (path.length == 0) {
+        if (path.isEmpty) {
           _value
         } else {
           val head = path.head
