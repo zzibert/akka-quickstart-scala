@@ -13,40 +13,39 @@ class MedianFinder() {
 
 
   def findMedian(): Double = {
-    val newHeap = heap.clone()
+    val deleted = mutable.ListBuffer[Int]()
+
+    val length = heap.length
 
     // delete half
-    val half = (heap.length - 1)  / 2
+    val half = (length - 1)  / 2
 
     for (_ <- 0 until half) {
-      newHeap.delete()
+      deleted.addOne(heap.delete())
     }
 
-    if (heap.length % 2 != 0) {
-      newHeap.getFirst()
-    } else {
-      val first = newHeap.getFirst()
-      newHeap.delete()
-      val second = newHeap.getFirst()
+    val result =
+      if (length % 2 != 0) {
+      heap.getFirst()
+      } else {
+        val first = heap.getFirst()
+        deleted.addOne(heap.delete())
+        val second = heap.getFirst()
 
-      (first + second) / 2.0
+        (first + second) / 2.0
+      }
+
+    deleted foreach { node =>
+      heap.insert(node)
     }
+
+    result
   }
 
   case class Heap() {
     private val nodes = mutable.ArrayBuffer[TreeNode]()
 
     def length = nodes.length
-
-    override def clone(): Heap = {
-      val newHeap = new Heap()
-
-      nodes.view.map(_.value).foreach { value =>
-        newHeap.insert(value)
-      }
-
-      newHeap
-    }
 
     def insert(value: Int): Unit = {
       if (nodes.isEmpty) {
@@ -67,16 +66,15 @@ class MedianFinder() {
       }
     }
 
-    def delete(): Unit = {
+    def delete(): Int = {
+      val deleted = nodes(0).value
       val value = nodes(length - 1).value
       nodes(0).value = value
       deleteLast()
       nodes.remove(length - 1)
 
       swapIfSmaller(nodes(0))
-      //      println(s"Deleted: ${value}")
-      //      traverse(nodes)
-      //      println()
+      deleted
     }
 
     def deleteLast(): Unit = {
