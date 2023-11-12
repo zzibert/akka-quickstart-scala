@@ -34,6 +34,7 @@ class Codec {
       }
 
       treeNodes
+        .view
         .zipWithIndex
         .filterNot(node => node._1 == null)
         .foreach {
