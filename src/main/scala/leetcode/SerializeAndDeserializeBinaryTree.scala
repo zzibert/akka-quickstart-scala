@@ -5,84 +5,62 @@ import scala.collection.mutable
 class Codec {
   // Encodes a list of strings to a single string.
   def serialize(root: TreeNode): String = {
-    val nodes =
-      traverse(root) collect {
-        case root if root != null => root.value
-        case _ => 1001
-      }
-    nodes.mkString("|")
+    val nodes = mutable.Map[Int, Int]()
+    traverse(root, 0, nodes)
+    val result = nodes.view.toList.map(node => s"${node._1}+${node._2}").mkString("|")
+    nodes.clear()
+    result
   }
 
   // Decodes a single string to a list of strings.
   def deserialize(data: String): TreeNode = {
+    val keyValue = mutable.Map[Int, Int]()
     if (data.nonEmpty) {
-      val nodes = data.split('|').map(_.toInt)
-
-      deTraverse(nodes)
-    } else {
-      null
-    }
-  }
-
-  def deTraverse(nodes: Array[Int]): TreeNode = {
-    if (nodes.length == 0) {
-      null
-    } else {
-      val treeNodes = nodes map {
-        case node if node != 1001 => new TreeNode(node)
-        case _ => null
+      val nodes = data.split('|')
+      nodes foreach { node =>
+        val tuple = node.split('+')
+        val key = tuple.head.toInt
+        val value = tuple.last.toInt
+        keyValue.update(key, value)
       }
 
-      treeNodes
-        .view
-        .zipWithIndex
-        .filterNot(node => node._1 == null)
-        .foreach {
-          case (node, index) =>
-            node.left = getLeftChild(index, treeNodes)
-            node.right = getRightChild(index, treeNodes)
-        }
-
-
-      treeNodes.head
-    }
-  }
-
-  def getLeftChild(parentIndex: Int, nodes: Array[TreeNode]): TreeNode = {
-    val childIndex = (parentIndex * 2) + 1
-    if (childIndex < nodes.length) {
-      nodes(childIndex)
+      deTraverse(keyValue, 0)
     } else {
       null
     }
   }
 
-  def getRightChild(parentIndex: Int, nodes: Array[TreeNode]): TreeNode = {
-    val childIndex = (parentIndex * 2) + 2
-    if (childIndex < nodes.length) {
-      nodes(childIndex)
-    } else {
-      null
+  def deTraverse(nodes: mutable.Map[Int, Int], index: Int): TreeNode = {
+    nodes.get(index) match {
+      case Some(value) =>
+        val node = new TreeNode(value)
+        node.left = deTraverse(nodes, getLeftChildIndex(index))
+        node.right = deTraverse(nodes, getRightChildIndex(index))
+        node
+
+      case None =>
+        null
+
     }
   }
 
-  def traverse(root: TreeNode): List[TreeNode] = {
-    val queue = mutable.Queue[TreeNode]()
-    val result = mutable.ListBuffer[TreeNode]()
-    queue.enqueue(root)
+  def getLeftChildIndex(parentIndex: Int): Int = {
+    (parentIndex * 2) + 1
+  }
 
-    while (queue.exists(_ != null)) {
-      val node = queue.dequeue()
-      result.addOne(node)
-      if (node != null) {
-        queue.enqueue(node.left)
-        queue.enqueue(node.right)
-      } else {
-        queue.enqueue(null)
-        queue.enqueue(null)
-      }
+  def getRightChildIndex(parentIndex: Int): Int = {
+    (parentIndex * 2) + 2
+  }
+
+  def traverse(root: TreeNode, index: Int, nodes: mutable.Map[Int, Int]): Unit = {
+    if (root != null) {
+      nodes.update(index, root.value)
+
+      val leftIndex = (index * 2) + 1
+      traverse(root.left, leftIndex, nodes)
+
+      val rightIndex = (index * 2) + 2
+      traverse(root.right, rightIndex, nodes)
     }
-
-    result.toList
   }
 }
