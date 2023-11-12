@@ -3,18 +3,18 @@ package leetcode
 import scala.collection.mutable
 
 class Codec {
+  private val keyValue = mutable.Map[Int, Int]()
+
   // Encodes a list of strings to a single string.
   def serialize(root: TreeNode): String = {
-    val nodes = mutable.Map[Int, Int]()
-    traverse(root, 0, nodes)
-    val result = nodes.view.toList.map(node => s"${node._1}+${node._2}").mkString("|")
-    nodes.clear()
+    traverse(root, 0)
+    val result = keyValue.view.toList.map(node => s"${node._1}+${node._2}").mkString("|")
+    keyValue.clear()
     result
   }
 
   // Decodes a single string to a list of strings.
   def deserialize(data: String): TreeNode = {
-    val keyValue = mutable.Map[Int, Int]()
     if (data.nonEmpty) {
       val nodes = data.split('|')
       nodes foreach { node =>
@@ -24,18 +24,18 @@ class Codec {
         keyValue.update(key, value)
       }
 
-      deTraverse(keyValue, 0)
+      deTraverse(0)
     } else {
       null
     }
   }
 
-  def deTraverse(nodes: mutable.Map[Int, Int], index: Int): TreeNode = {
-    nodes.get(index) match {
+  def deTraverse(index: Int): TreeNode = {
+    keyValue.get(index) match {
       case Some(value) =>
         val node = new TreeNode(value)
-        node.left = deTraverse(nodes, getLeftChildIndex(index))
-        node.right = deTraverse(nodes, getRightChildIndex(index))
+        node.left = deTraverse(getLeftChildIndex(index))
+        node.right = deTraverse(getRightChildIndex(index))
         node
 
       case None =>
@@ -52,15 +52,15 @@ class Codec {
     (parentIndex * 2) + 2
   }
 
-  def traverse(root: TreeNode, index: Int, nodes: mutable.Map[Int, Int]): Unit = {
+  def traverse(root: TreeNode, index: Int): Unit = {
     if (root != null) {
-      nodes.update(index, root.value)
+      keyValue.update(index, root.value)
 
       val leftIndex = (index * 2) + 1
-      traverse(root.left, leftIndex, nodes)
+      traverse(root.left, leftIndex)
 
       val rightIndex = (index * 2) + 2
-      traverse(root.right, rightIndex, nodes)
+      traverse(root.right, rightIndex)
     }
   }
 }
