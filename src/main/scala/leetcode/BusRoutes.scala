@@ -8,34 +8,50 @@ object BusRoutes {
       return 0
     }
 
-    val destinations = mutable.Map[Int, mutable.ArrayBuffer[Array[Int]]]()
+    val visited = mutable.Map[Int, Boolean]()
 
-    val queue = mutable.Queue[(Int, Array[Int])]()
+    val destinations = mutable.Map[Int, Array[Int]]()
+
+    val queue = mutable.Queue[(Int, Int)]()
 
     routes foreach { route =>
       route foreach { stop =>
-        val buffer = destinations.getOrElseUpdate(stop, mutable.ArrayBuffer[Array[Int]]())
-        buffer.addOne(route)
+        var buffer = destinations.getOrElseUpdate(stop, Array[Int]())
+        route foreach { element =>
+          buffer = buffer :+ element
+        }
+
+        destinations.update(stop, buffer.distinct)
       }
     }
 
-    val initial = routes.filter(_.contains(source)).flatten.distinct
+    destinations.get(source) match {
+      case Some(initials) =>
+        initials foreach { initial =>
+          queue.enqueue((1, initial))
+        }
 
-    queue.enqueue((1, initial))
+      case None =>
+    }
 
     while (queue.nonEmpty) {
       val (counter, current) = queue.dequeue()
-      if (current.contains(target)) {
+      if (current == target) {
         return counter
       } else {
-        current foreach { stop =>
-          destinations.get(stop) match {
-            case Some(stops) =>
-              stops.view.map((counter+1, _)).foreach(queue.enqueue)
-              destinations -= stop
+        destinations.get(current) match {
+          case Some(stops) =>
+            stops foreach { stop =>
+              visited.get(stop) match {
+                case Some(_) =>
+                case None =>
+                  queue.enqueue((counter+1, stop))
+                  visited.update(stop, true)
+              }
+              destinations -= current
+            }
 
-            case None =>
-          }
+          case None =>
         }
       }
     }
