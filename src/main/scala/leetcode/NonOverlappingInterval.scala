@@ -9,7 +9,7 @@ class NonOverlappingInterval {
 
     val buffer = mutable.ArrayBuffer[Interval]()
 
-    val sorted = intervals.sortBy(x => (x(0), x(1))) foreach { interval =>
+    intervals.sortBy(x => (x(0), x(1))) foreach { interval =>
       buffer.addOne(Interval(start = interval(0), end = interval(1)))
     }
 
@@ -18,22 +18,35 @@ class NonOverlappingInterval {
     var i = 0
 
     while (i < (buffer.length-1)) {
-      if (doesOverlap(buffer(i), buffer(i+1))) {
-        if (i+2 < buffer.length) {
-          if (doesOverlap(buffer(i+1), buffer(i+2))) {
-            buffer.remove(i+1)
-            result += 1
-          } else {
-            buffer.remove(i)
-            result += 1
-          }
-        } else {
-          buffer.remove(i)
-          result += 1
-        }
-      } else {
-        i += 1
+      val j = i+1
+      while (j < buffer.length && sameStart(buffer(i), buffer(j))) {
+        buffer.remove(j)
+        result += 1
       }
+
+      i += 1
+    }
+
+    while (true) {
+      val overlaps = Array.fill(buffer.length)(0)
+      for (i <- 0 until buffer.length) {
+        var numberOfOverlaps = 0
+        var j = i + 1
+        while (j < buffer.length && doesOverlap(buffer(i), buffer(j))) {
+          overlaps(i) += 1
+          overlaps(j) += 1
+          numberOfOverlaps += 1
+          j += 1
+        }
+      }
+
+      val maxOverlaps = overlaps.zipWithIndex.maxBy(x => x._1)
+      if (maxOverlaps._1 < 1) {
+        return result
+      }
+      println(s"removed ${buffer(maxOverlaps._2)}")
+      buffer.remove(maxOverlaps._2)
+      result += 1
     }
 
     result
@@ -43,5 +56,8 @@ class NonOverlappingInterval {
     first.end > second.start
   }
 
+  def sameStart(first: Interval, second: Interval): Boolean = {
+    first.start == second.start
+  }
 
 }
