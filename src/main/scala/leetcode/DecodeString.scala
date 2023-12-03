@@ -23,9 +23,9 @@ object DecodeString {
           case endBracket if endBracket == ']' =>
             val multiplier = numbers.pop()
             val startBracket = startBrackets.pop()
-            val str = s.substring(startBracket+1, index)
-            val recursive = decodeString(str)
             if (startBrackets.isEmpty) {
+              val str = s.substring(startBracket + 1, index)
+              val recursive = decodeString(str)
               result += getString(multiplier, recursive)
             }
 
