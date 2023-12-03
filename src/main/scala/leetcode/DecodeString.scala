@@ -7,21 +7,27 @@ object DecodeString {
     var result = ""
     val numbers = mutable.Stack[Int]()
     val startBrackets = mutable.Stack[Int]()
+    var numberBuffer = ""
 
     s.zipWithIndex foreach {
       case (char, index) =>
         char match {
           case number if number.isDigit =>
-            numbers.push(toInt(char))
+            numberBuffer += number
 
           case startBracket if startBracket == '[' =>
             startBrackets.push(index)
+            numbers.push(numberBuffer.toInt)
+            numberBuffer = ""
 
           case endBracket if endBracket == ']' =>
             val multiplier = numbers.pop()
             val startBracket = startBrackets.pop()
             val str = s.substring(startBracket+1, index)
-            result += getString(multiplier, str)
+            val recursive = decodeString(str)
+            if (startBrackets.isEmpty) {
+              result += getString(multiplier, recursive)
+            }
 
           case char =>
             if (startBrackets.isEmpty) {
