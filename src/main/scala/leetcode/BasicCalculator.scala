@@ -3,102 +3,68 @@ package leetcode
 import scala.collection.mutable
 
 object BasicCalculator {
-  def calculateHelper(trimmed: Array[Char]): Int = {
-    val parentheses = mutable.Stack[Int]()
+  def calculate(s: String): Int = {
     var result = 0
-    var plusOrMinus: Boolean = true
-    val numberBuffer = mutable.ArrayBuffer[Char]()
+    var numberStr = ""
+    val parentheses = mutable.Stack[Int]()
+    var digitInProgress = false
+    var isPlus = true
 
-    trimmed.zipWithIndex foreach {
+    s.zipWithIndex foreach {
       case (char, index) =>
         char match {
           case '+' =>
-            if (numberBuffer.nonEmpty) {
-              val number = toNumber(numberBuffer)
-              if (plusOrMinus) {
+            if (digitInProgress) {
+              val number = numberStr.toInt
+              if (isPlus) {
                 result += number
               } else {
                 result -= number
               }
+              digitInProgress = false
+              isPlus = true
+              numberStr = ""
             }
-            numberBuffer.clear()
-            if (parentheses.isEmpty) {
-              plusOrMinus = true
-            }
-
+            isPlus = true
           case '-' =>
-            if (numberBuffer.nonEmpty) {
-              val number = toNumber(numberBuffer)
-              if (plusOrMinus) {
+            if (digitInProgress) {
+              val number = numberStr.toInt
+              if (isPlus) {
                 result += number
               } else {
                 result -= number
               }
+              digitInProgress = false
+              isPlus = true
+              numberStr = ""
             }
-            numberBuffer.clear()
-            if (parentheses.isEmpty) {
-              plusOrMinus = false
+            if (isPlus) {
+              isPlus = false
+            } else {
+              isPlus = true
             }
-
           case '(' =>
-            if (numberBuffer.nonEmpty) {
-              val number = toNumber(numberBuffer)
-              if (plusOrMinus) {
-                result += number
-              } else {
-                result -= number
-              }
-            }
-            numberBuffer.clear()
             parentheses.push(index)
-
           case ')' =>
-            val startIndex = parentheses.pop()
-            if (parentheses.isEmpty) {
-              val localResult =
-                if (plusOrMinus) {
-                  calculateHelper(trimmed.slice(startIndex + 1, index))
-                } else {
-                  -calculateHelper(trimmed.slice(startIndex + 1, index))
-                }
-              result += localResult
-            }
-
-          case numberChar =>
-            if (parentheses.isEmpty) {
-              numberBuffer.addOne(numberChar)
-//              val number = getInt(numberChar)
-//              if (plusOrMinus) {
-//                result += number
-//              } else {
-//                result -= number
-//              }
-            }
+            val startIndex = parentheses.pop() + 1
+            val value = calculate(s.substring(startIndex, index))
+            return calculate(s.take(startIndex-1) + value.toString + s.drop(index + 1))
+          case ' ' =>
+          case digit =>
+            digitInProgress = true
+            numberStr += digit
         }
     }
 
-    if (numberBuffer.nonEmpty) {
-      val number = toNumber(numberBuffer)
-      if (plusOrMinus) {
-        result += number
+    if (numberStr.nonEmpty) {
+      if (isPlus) {
+        result += numberStr.toInt
       } else {
-        result -= number
+        result -= numberStr.toInt
       }
     }
-    println(s"string: ${trimmed.mkString}, result: $result")
+
+    println(s"this is the string: ${s}, this is the result: ${result}")
     result
-  }
-
-  def calculate(s: String): Int = {
-    val trimmed = s.trim.filterNot(_.isWhitespace)
-    calculateHelper(trimmed.toCharArray)
-  }
-
-  def getInt(char: Char): Int = {
-    char.toInt - 48
-  }
-
-  def toNumber(buffer: mutable.ArrayBuffer[Char]): Int = {
-    buffer.mkString.toInt
   }
 }
