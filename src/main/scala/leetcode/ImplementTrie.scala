@@ -1,62 +1,68 @@
 package leetcode
 
-import scala.collection.mutable
+class Trie() {
+  val root = new Node(' ')
 
-object ImplementTrie {
-  class Trie() {
-    var value: Char = '0'
-    var isWord: Boolean = false
-    var children = mutable.Map[Char, Trie]()
+  def insert(word: String): Unit = {
+    val array = word.toCharArray
+    root.insert(array)
+  }
 
-    def insert(word: String) {
-      if (word != "") {
-        val head = word.head
-        val tail = word.tail
+  def search(word: String): Boolean = {
+    val array = word.toCharArray
+    root.search(array)
+  }
 
-        children.get(head) match {
-          case Some(child) =>
-            child.insert(tail)
+  def startsWith(prefix: String): Boolean = {
+    val array = prefix.toCharArray
+    root.startsWith(array)
+  }
 
-          case None =>
-            val child = new Trie()
-            child.value = head
-            children += (head -> child)
-            child.insert(tail)
-        }
-      } else {
-        isWord = true
+}
+
+class Node(val char: Char) {
+  var isWord: Boolean = false
+  var children: Seq[Node] = Seq.empty
+
+  def insert(word: Array[Char]): Unit = {
+    if (word.isEmpty) {
+      isWord = true
+    } else {
+      children.find(child => child.char == word.head) match {
+        case Some(child) =>
+          child.insert(word.tail)
+
+        case None =>
+          val child = new Node(word.head)
+          children = children :+ child
+          child.insert(word.tail)
       }
     }
+  }
 
-    def search(word: String): Boolean = {
-      if (word == "") {
-        isWord
-      } else {
-        val head = word.head
-        val tail = word.tail
-        children.get(head) match {
-          case Some(child) =>
-            child.search(tail)
-          case None =>
-            false
-        }
+  def search(word: Array[Char]): Boolean = {
+    if (word.isEmpty) {
+      isWord
+    } else {
+      children.find(child => child.char == word.head) match {
+        case Some(child) =>
+          child.search(word.tail)
+
+        case None =>
+          false
       }
     }
+  }
 
-    def startsWith(prefix: String): Boolean = {
-      if (prefix == "") {
-        true
-      } else {
-        val head = prefix.head
-        val tail = prefix.tail
-        children.get(head) match {
-          case Some(child) =>
-            child.startsWith(tail)
-          case None =>
-            false
-        }
+  def startsWith(prefix: Array[Char]): Boolean = {
+    if (prefix.size == 1) {
+      children.exists(child => child.char == prefix.head)
+    } else {
+      children.find(child => child.char == prefix.head) match {
+        case Some(child) => child.startsWith(prefix.tail)
+
+        case None => false
       }
     }
-
   }
 }
