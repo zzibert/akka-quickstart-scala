@@ -4,24 +4,23 @@ import scala.collection.mutable
 
 class MinStack() {
   val stack = mutable.Stack[(Int, Int)]()
-  var minimum = Int.MaxValue
 
-  def push(`val`: Int) {
-    if (`val` < minimum) {
-      minimum = `val`
+  def push(`val`: Int): Unit = {
+    val value = `val`
+    if (stack.isEmpty) {
+      stack.push((value, value))
+    } else {
+      val min = stack.top._2
+      if (value < min) {
+        stack.push((value, value))
+      } else {
+        stack.push((value, min))
+      }
     }
-
-    stack.push((`val`, minimum))
   }
 
-  def pop() {
-    stack.pop()
-    if (stack.nonEmpty) {
-      val (_, newMin) = stack.top
-      minimum = newMin
-    } else {
-      minimum = Int.MaxValue
-    }
+  def pop(): Unit = {
+    stack.pop()._1
   }
 
   def top(): Int = {
