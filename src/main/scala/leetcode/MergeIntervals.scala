@@ -1,34 +1,28 @@
 package leetcode
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable
 
-object MergeIntervals {
-
-  implicit val ordering: Ordering[Array[Int]] = Ordering.by { array =>
-    array(0)
-  }
+object Solution {
   def merge(intervals: Array[Array[Int]]): Array[Array[Int]] = {
-    val intervalsSorted = ArrayBuffer.from(intervals.sorted)
-
     var i = 0
+    val result = mutable.ArrayBuffer[Array[Int]]()
+    val sortedIntervals = intervals.sortBy(_(0))
 
-    while (i < (intervalsSorted.length-1)) {
-      if (intervalsSorted(i)(1) >= intervalsSorted(i+1)(1)) {
-        intervalsSorted.remove(i+1)
-      } else if (intervalsSorted(i)(1) >= intervalsSorted(i+1)(0)) {
-        val newValue =
-          if (intervalsSorted(i)(1) >= intervalsSorted(i+1)(1)) {
-            intervalsSorted(i)(1)
-          } else {
-            intervalsSorted(i+1)(1)
-          }
-        intervalsSorted(i)(1) = newValue
-        intervalsSorted.remove(i+1)
-      } else {
+    while (i < sortedIntervals.length) {
+      var interval = sortedIntervals(i)
+      var j = i + 1
+      while (j < intervals.length && sortedIntervals(j)(0) <= interval(1)) {
+        val bigger = Math.max(interval(1), sortedIntervals(j)(1))
+        val smaller = Math.min(interval(0), sortedIntervals(j)(0))
+        interval = Array(smaller, bigger)
         i += 1
+        j += 1
       }
+
+      result.addOne(interval)
+      i += 1
     }
 
-    intervalsSorted.toArray
+    result.toArray
   }
 }
