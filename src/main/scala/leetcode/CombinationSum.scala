@@ -1,36 +1,39 @@
 package leetcode
 
 import scala.collection.mutable
-import scala.collection.mutable.Set
-import scala.collection.mutable.ListBuffer
 
-object CombinationSum {
+object Solution {
   def combinationSum(candidates: Array[Int], target: Int): List[List[Int]] = {
-    val combinations = mutable.Map[Int, Set[List[Int]]]()
+    val result = mutable.ListBuffer[Array[Int]]()
+    val seen = mutable.Map[Array[Int], Boolean]()
 
-    candidates foreach { candidate =>
-      val combination = ListBuffer[Int]()
-      var combinationSum = 0
-      while (combinationSum <= target) {
-        combination.addOne(candidate)
-        combinationSum = combination.sum
-        val buffer = combinations.getOrElseUpdate(combinationSum, Set[List[Int]]())
-        buffer.addOne(combination.toList)
+    combinationSumHelper(candidates, target, Array.empty, result, seen)
 
-        val subtraction = target - combinationSum
-        for {
-          i <- 2 to subtraction
-        } {
-          val buffer2 = combinations.getOrElseUpdate(i, Set[List[Int]]())
-          buffer2 foreach { combination2 =>
-            val newCombination = combination ++ combination2
-            val buffer3 = combinations.getOrElseUpdate(newCombination.sum, Set[List[Int]]())
-            buffer3.addOne(newCombination.toList.sorted)
+    result.map(_.toList).toList
+  }
+
+  def combinationSumHelper(
+      candidates: Array[Int],
+      target: Int,
+      currentList: Array[Int],
+      result: mutable.ListBuffer[Array[Int]],
+      seen: mutable.Map[Array[Int], Boolean]
+  ): Unit = {
+    seen.get(currentList) match {
+      case Some(_) =>
+      case None =>
+        seen.update(currentList, true)
+        for (i <- 0 until candidates.length) {
+          val newArray = (currentList :+ candidates(i)).sorted
+          if (seen.get(newArray).isEmpty) {
+            val summa = newArray.sum
+            if (summa == target) {
+              result.addOne(newArray)
+            } else if (summa < target) {
+              combinationSumHelper(candidates, target, newArray, result, seen)
+            }
           }
         }
-      }
     }
-
-    combinations.getOrElse(target, ListBuffer[List[Int]]()).toList
   }
 }
