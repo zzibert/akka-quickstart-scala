@@ -1,38 +1,30 @@
 package leetcode
 
 import scala.collection.mutable
-class BinaryTreeRightSideView {
-  def rightSideView(root: TreeNode): List[Int] = {
-    if (root == null) {
-      return Nil
-    }
 
-    val result = mutable.ListBuffer[Int]()
+object Solution {
+  def rightSideView(root: TreeNode): List[Int] = {
+    val result = mutable.ArrayBuffer[Int]()
     val queue = mutable.Queue[TreeNode]()
 
-    queue.addOne(root)
+    queue.enqueue(root)
 
-    while (true) {
-      val row = queue.reverse.toList
-      if (row.isEmpty) {
-        return result.toList
-      } else {
-        result.addOne(row(0).value)
-      }
-      queue.clear()
-      row
-        .view
-        .reverse
-        .foreach { node =>
-          if (node.left != null) {
-            queue.addOne(node.left)
-          }
-          if (node.right != null) {
-            queue.addOne(node.right)
-          }
+    while (queue.nonEmpty) {
+      val level = mutable.ArrayBuffer[Int]()
+      for (_ <- 0 until queue.length) {
+        val node = queue.dequeue()
+        if (node != null) {
+          level.addOne(node.value)
+          queue.enqueue(node.left)
+          queue.enqueue(node.right)
         }
+      }
+      if (level.nonEmpty) {
+        result.addOne(level.last)
+      }
     }
 
     result.toList
   }
 }
+
