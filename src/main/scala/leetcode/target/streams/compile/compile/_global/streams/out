@@ -1,0 +1,7 @@
+[0m[[0m[31merror[0m] [0m[0m/Users/zzibert/Razvoj/akka-quickstart-scala/src/main/scala/leetcode/GenerateParentheses.scala:10:41: identifier expected but string literal found.[0m
+[0m[[0m[31merror[0m] [0m[0m      generateParenthesesHelper(n, List["()"])[0m
+[0m[[0m[31merror[0m] [0m[0m                                        ^[0m
+[0m[[0m[31merror[0m] [0m[0m/Users/zzibert/Razvoj/akka-quickstart-scala/src/main/scala/leetcode/GenerateParentheses.scala:11:5: ']' expected but '}' found.[0m
+[0m[[0m[31merror[0m] [0m[0m    }[0m
+[0m[[0m[31merror[0m] [0m[0m    ^[0m
+[0m[[0m[31merror[0m] [0m[0mtwo errors found[0m
