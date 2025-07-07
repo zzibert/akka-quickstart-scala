@@ -1,28 +1,42 @@
-package leetcode
+import scala.collection.mutable
 
-object ContainerWithMostWater {
+object Solution {
   def maxArea(height: Array[Int]): Int = {
-    var first = 0
-    var second = 1
+    val candidates = mutable.ArrayBuffer[(Int, Int)]()
+    var maxWater = 0
+    var leftPointer = 0
+    var leftValue = 0
 
-    var tallestFirst = 0
-    var maxAmount = 0
+    for (i <- 1 until height.length) {
+      candidates.addOne((height(i), i))
+    }
 
-    for {
-      i <- 0 until (height.length-1)
-    } {
-      if (height(i) > tallestFirst) {
-        tallestFirst = height(i)
-        for (j <- i+1 until height.length) {
-          val localHight = Math.min(tallestFirst, height(j))
-          val localSum = localHight * (j - i)
-          if (localSum > maxAmount) {
-            maxAmount = localSum
+    while (leftPointer < height.length) {
+      if (leftValue < height(leftPointer)) {
+        leftValue = height(leftPointer)
+        var i = 0
+        while (i < candidates.length) {
+          val (rightValue, rightPointer) = candidates(i)
+          val water = calculateWater(leftPointer, rightPointer, leftValue, rightValue)
+          if (maxWater <= water) {
+            i += 1
+            maxWater = water
+          } else {
+            candidates.remove(i)
           }
         }
       }
+      leftPointer += 1
     }
 
-    maxAmount
+    maxWater
   }
+
+  def calculateWater(
+      leftIndex: Int,
+      rightIndex: Int,
+      leftValue: Int,
+      rightValue: Int
+  ): Int =
+    (rightIndex - leftIndex) * Math.min(leftValue, rightValue)
 }
