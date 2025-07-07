@@ -1,15 +1,5 @@
 import scala.collection.mutable
 
-class TreeNode(
-    _value: Int = 0,
-    _left: TreeNode = null,
-    _right: TreeNode = null
-) {
-  var value: Int = _value
-  var left: TreeNode = _left
-  var right: TreeNode = _right
-}
-
 object Solution {
   def rightSideView(root: TreeNode): List[Int] = {
     val queue = mutable.Queue[TreeNode]()
@@ -19,16 +9,16 @@ object Solution {
 
     while (queue.nonEmpty) {
       val size = queue.size
-      var level = List[Int]()
+      var level: Option[Int] = None
       for (_ <- 0 until size) {
         val node = queue.dequeue()
         if (node != null) {
-          level = node.value :: level
+          level = Some(node.value)
           queue.enqueue(node.left)
           queue.enqueue(node.right)
         }
       }
-      level.headOption.foreach(result.addOne)
+      level.foreach(result.addOne)
     }
 
     result.toList
