@@ -1,25 +1,36 @@
-package leetcode
-
-object MinimumSizeSubarraySum {
+object Solution {
   def minSubArrayLen(target: Int, nums: Array[Int]): Int = {
-    for (length <- 1 to nums.length) {
-      var summa = 0
-      for (i <- 0 until length) {
-        summa += nums(i)
-      }
+    val length = nums.length
+    val leftValue = Array.fill(length+1)(0)
+    var currentValue = 0
+    var size = 1
+    var conditionMet = false
 
-      for (i <- length until nums.length) {
-        if (summa >= target) {
-          return length
-        }
-        summa -= nums(i-length)
-        summa += nums(i)
-      }
-      if (summa >= target) {
-        return length
+    for (i <- 0 to length) {
+      leftValue(i) = currentValue
+      if (i < length) {
+        currentValue += nums(i)
       }
     }
 
-    0
+    while (!conditionMet && size <= length) {
+      for (i <- 0 to length-size) {
+        val j = i + size
+        val value = leftValue(j) - leftValue(i)
+        if (value >= target) {
+          conditionMet = true
+        }
+      }
+
+      if (!conditionMet) {
+        size += 1
+      }
+    }
+
+    if (conditionMet) {
+      size
+    } else {
+      0
+    }
   }
 }
