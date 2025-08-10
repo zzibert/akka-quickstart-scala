@@ -1,50 +1,27 @@
-import scala.collection.mutable
-
 object Solution {
   def coinChange(coins: Array[Int], amount: Int): Int = {
-    val coinsBuffer = mutable.ArrayBuffer.from(coins)
-    val bestResultYet = mutable.Map[Int, Int]()
+    val numberOfCoins = Array.fill(amount + 1)(-1)
+    numberOfCoins(0) = 0
 
-    val result = coinChangeHelper(coinsBuffer, amount, 0, bestResultYet)
-
-    if (result == Int.MaxValue) {
-      -1
-    } else {
-      result
-    }
-  }
-
-  def coinChangeHelper(coins: mutable.ArrayBuffer[Int], amount: Int, numberOfCoins: Int, bestResultYet: mutable.Map[Int, Int]): Int = {
     if (amount == 0) {
-      numberOfCoins
-    } else if (amount > 0) {
-      var result = Int.MaxValue
-
+      0
+    } else {
       for {
+        i <- 0 until amount
+        if numberOfCoins(i) != -1
         coin <- coins
       } {
-        val newAmount = amount - coin
-        val newNumberOfCoins = numberOfCoins + 1
-        bestResultYet.get(newAmount) match {
-          case Some(bestYet) =>
-            if (bestYet > newNumberOfCoins) {
-              val currentResult = coinChangeHelper(coins, amount - coin, numberOfCoins + 1, bestResultYet.addOne((newAmount, newNumberOfCoins)))
-              if (currentResult < result) {
-                result = currentResult
-              }
-            }
-
-          case None =>
-            val currentResult = coinChangeHelper(coins, amount - coin, numberOfCoins + 1, bestResultYet.addOne((newAmount, newNumberOfCoins)))
-            if (currentResult < result) {
-              result = currentResult
-            }
+        val currentCoins = numberOfCoins(i)
+        val newAmount = i + coin
+        if (newAmount > 0 && newAmount <= amount) {
+          val nextCoins = currentCoins + 1
+          if (numberOfCoins(newAmount) == -1 || numberOfCoins(newAmount) > nextCoins) {
+            numberOfCoins(newAmount) = nextCoins
+          }
         }
       }
 
-      result
-    } else {
-      Int.MaxValue
+      numberOfCoins(amount)
     }
   }
 }
