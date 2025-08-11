@@ -1,36 +1,20 @@
 object Solution {
   def maxProfit(prices: Array[Int]): Int = {
+    var result = 0
     val length = prices.length
-    var profit = 0
-
-    var currentLargest = Int.MinValue
-    var currentIndex = 0
-    var i = 0
-
-    while (i < length) {
-      if (prices(i) > currentLargest) {
-        currentLargest = prices(i)
-        i += 1
-      } else {
-        val slice = prices.drop(currentIndex).take(i-currentIndex)
-        profit += getProfit(slice)
-        currentIndex = i
-        currentLargest = Int.MinValue
+    if (prices.length < 2) {
+      0
+    } else {
+      for {
+        i <- 0 until length-1
+        j = i + 1
+      } {
+        if (prices(i) < prices(j)) {
+          result += prices(j) - prices(i)
+        }
       }
     }
 
-    val slice = prices.drop(currentIndex).take(i-currentIndex)
-    profit += getProfit(slice)
-
-    profit
-  }
-
-  def getProfit(prices: Array[Int]): Int = {
-    if (prices.isEmpty) {
-      0
-    } else {
-      val last = prices.length-1
-      prices(last) - prices(0)
-    }
+    result
   }
 }
