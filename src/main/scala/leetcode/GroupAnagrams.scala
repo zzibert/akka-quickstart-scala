@@ -1,18 +1,14 @@
 package leetcode
 
-import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
-
-object GroupAnagrams {
+object Solution {
   def groupAnagrams(strs: Array[String]): List[List[String]] = {
-    val anagrams = mutable.Map[String, ListBuffer[String]]()
-
-    strs foreach { str =>
-      val key = str.toSeq.sorted.unwrap
-      val buffer = anagrams.getOrElseUpdate(key, ListBuffer[String]())
-      buffer.addOne(str)
+    var wordMap = Map[String, List[String]]()
+    for (word <- strs) {
+      val ordered = word.sorted
+      val words = word :: wordMap.get(ordered).getOrElse(List.empty)
+      wordMap += (ordered -> words)
     }
 
-    anagrams.values.map(_.toList).toList
+    wordMap.values.toList
   }
 }

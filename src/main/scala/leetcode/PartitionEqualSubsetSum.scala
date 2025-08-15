@@ -9,42 +9,69 @@ object Solution {
     if (total % 2 == 1) {
       false
     } else {
-      val half = total / 2
-      val remainingNumbers = mutable.Map.empty[Int, Set[Array[Int]]]
-      remainingNumbers.update(0, Set(nums))
+      var half = total / 2
+      var start = 0
+      var startArray = Array.empty[Int]
+      val tabulationStore = mutable.Map[Int, mutable.Set[Array[Int]]]()
 
-      for {
-        i <- 0 until half
-        remainingList <- remainingNumbers.get(i)
-        remaining <- remainingList
-      } {
-        for (j <- 0 until remaining.length) {
-          val score = i + remaining(j)
-          if (score > 0 && score <= half) {
-            val newArray = remaining.take(j) ++ remaining.drop(j + 1)
-            remainingNumbers.get(score) match {
-              case Some(remainingSet) =>
-                if (!remainingSet.exists(a => a.sameElements(newArray))) {
-                  remainingNumbers.update(score, remainingSet + newArray)
+      val numbersMap = mutable.Map[Int, Int]()
+      for (number <- nums) {
+        numbersMap.get(number) match {
+          case Some(amount) => numbersMap.update(number, amount+1)
+          case None => numbersMap.update(number, 1)
+        }
+      }
+
+      numbersMap foreach {
+        case (number, amount) =>
+          if (amount % 2 == 0) {
+
+            half -= number * amount
+          } else {
+            half -= number * (amount -1)
+            startArray = startArray.appended(number)
+          }
+      }
+
+      var found = false
+
+      if (start / 2 == half) {
+        found = true
+      }
+
+      tabulationStore.update(start, mutable.Set[Array[Int]](startArray.sorted))
+
+      var i = 0
+
+      while (!found && i < half) {
+        tabulationStore.remove(i - 1)
+
+        tabulationStore.get(i) foreach { numberSets =>
+          for (numbers <- numberSets) {
+            for (j <- 0 until numbers.length) {
+              val k = numbers(j)
+
+              val result = i + k
+              if (result == half) {
+                found = true
+              } else if (result < half) {
+                val newSet = numbers.take(j) ++ numbers.drop(j + 1)
+                tabulationStore.get(result) match {
+                  case Some(existingSet) =>
+                    tabulationStore.update(result, existingSet.addOne(newSet))
+
+                  case None =>
+                    tabulationStore.update(result, mutable.Set(newSet))
                 }
-              case None =>
-                remainingNumbers.update(score, Set(newArray))
+              }
             }
           }
         }
 
-        remainingNumbers.drop(i)
+        i += 1
       }
 
-      for (i <- 3 until half) {
-        val remaining = remainingNumbers(i)
-        remaining foreach { a =>
-          println(s"${i} a: ${a.mkString(" ")}")
-        }
-      }
-
-      remainingNumbers.get(half).isDefined
+      found
     }
   }
 }
-
