@@ -6,6 +6,8 @@ object Solution {
              var leftOption: Option[Node] = None,
              var rightOption: Option[Node] = None) {
     var amount = 1
+
+    def isLeaf = leftOption.isEmpty && rightOption.isEmpty
   }
 
   class Heap(k: Int) {
@@ -14,18 +16,104 @@ object Solution {
     var nodesByCounter = Map[Int, Node]()
     var counter = 1
 
+    def isEmpty = nodeOption.isEmpty
+
+    def nonEmpty = !isEmpty
+
     def increment(key: Int): Unit = {
       nodesByKey.get(key) match {
         case Some(node) =>
           node.amount += 1
           checkForSwap(node)
-          checkForChildRotation(node)
+//          checkForChildRotation(node)
 
         case None =>
           val node = new Node(key)
           nodesByKey += (key -> node)
           nodesByCounter += (counter -> node)
           addNode(node)
+      }
+    }
+
+    def pop(): Option[Int] = {
+      nodeOption map { head =>
+        val pop = head.value
+        counter -= 1
+
+        if (head.isLeaf) {
+          nodeOption = None
+          nodesByKey -= head.value
+          nodesByCounter -= counter
+        } else {
+          swapWithLast(head)
+          bubbleDown(head)
+        }
+
+        pop
+      }
+    }
+
+    def bubbleDown(node: Node): Unit = {
+      if (!node.isLeaf) {
+        val childOption =
+          (node.leftOption, node.rightOption) match {
+            case (Some(leftChild), Some(rightChild)) =>
+              if (leftChild.amount > rightChild.amount) {
+                Some(leftChild)
+              } else {
+                Some(rightChild)
+              }
+
+            case (Some(leftChild), None) =>
+              Some(leftChild)
+
+            case (None, Some(rightChild)) =>
+              Some(rightChild)
+
+            case _ => None
+          }
+
+        childOption foreach { child =>
+          if (child.amount > node.amount) {
+            nodesByKey += (child.value -> node)
+            nodesByKey += (node.value -> child)
+
+            println(s"bubble down parent: ${node.value} with child ${child.value}")
+
+            val tempValue = child.value
+            val tempAmount = child.amount
+            child.value = node.value
+            child.amount = node.amount
+            node.value = tempValue
+            node.amount = tempAmount
+
+            bubbleDown(child)
+          }
+        }
+      }
+    }
+
+    def swapWithLast(root: Node): Unit = {
+      val parentCounter = counter / 2
+
+      for {
+        last <- nodesByCounter.get(counter)
+        lastParent <- nodesByCounter.get(parentCounter)
+      } {
+        nodesByKey += (last.value -> root)
+        nodesByKey -= root.value
+
+        println(s"swapped with last: ${last.value} with root: ${root.value}")
+
+        root.amount = last.amount
+        root.value = last.value
+
+        if (counter % 2 == 0) {
+          lastParent.leftOption = None
+        } else {
+          lastParent.rightOption = None
+        }
+        nodesByCounter -= counter
       }
     }
 
@@ -50,6 +138,7 @@ object Solution {
     def checkForSwap(node: Node): Unit = {
       node.parentOption foreach { parentNode =>
         if (parentNode.amount < node.amount) {
+          println(s"Swapping parent: ${parentNode.value} with child ${node.value}")
           nodesByKey += (node.value -> parentNode)
           nodesByKey += (parentNode.value -> node)
 
@@ -67,49 +156,36 @@ object Solution {
       }
     }
 
-    def checkForChildRotation(node: Node): Unit = {
-      node.parentOption foreach { parentNode =>
-        (parentNode.leftOption, parentNode.rightOption) match {
-          case (Some(leftChild), Some(rightChild)) =>
-            if (rightChild.amount > leftChild.amount) {
-              parentNode.rightOption = Some(leftChild)
-              parentNode.leftOption = Some(rightChild)
-            }
-
-          case _ =>
-        }
-
-        checkForChildRotation(parentNode)
-      }
-    }
-
-    def getTopKElements(): Array[Int] = {
-      val result = mutable.ArrayBuffer[Int]()
-      val queue = mutable.Queue[Node]()
-
-      nodeOption foreach { node =>
-        queue.enqueue(node)
-      }
-
-      while (queue.nonEmpty && result.length < k) {
-        val node = queue.dequeue()
-        result.addOne(node.value)
-        node.leftOption.foreach(queue.enqueue)
-        node.rightOption.foreach(queue.enqueue)
-      }
-
-      result.toArray
-    }
+    // Probably useless
+//    def checkForChildRotation(node: Node): Unit = {
+//      node.parentOption foreach { parentNode =>
+//        (parentNode.leftOption, parentNode.rightOption) match {
+//          case (Some(leftChild), Some(rightChild)) =>
+//            if (rightChild.amount > leftChild.amount) {
+//              parentNode.rightOption = Some(leftChild)
+//              parentNode.leftOption = Some(rightChild)
+//            }
+//
+//          case _ =>
+//        }
+//
+//        checkForChildRotation(parentNode)
+//      }
+//    }
   }
 
   def topKFrequent(nums: Array[Int], k: Int): Array[Int] = {
     val heap = new Heap(k)
+    val result = mutable.ArrayBuffer[Int]()
 
     for (number <- nums) {
       heap.increment(number)
     }
 
-    heap.getTopKElements()
-  }
+    while (heap.nonEmpty && result.length < k) {
+      heap.pop().foreach(result.addOne)
+    }
 
+    result.toArray
+  }
 }
