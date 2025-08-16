@@ -3,40 +3,38 @@ package leetcode
 import scala.collection.mutable
 
 object Solution {
-  def findOrder(numCourses: Int, prerequisites: Array[Array[Int]]): Array[Int] = {
+  def findOrder(numCourses: Int,
+                prerequisites: Array[Array[Int]]): Array[Int] = {
+    val allowedCourses = mutable.Queue[Int]()
+    val inDegree = Array.fill(numCourses)(0)
+    val graph = Array.fill(numCourses)(List[Int]())
     val result = mutable.ArrayBuffer[Int]()
-    val allowedClasses = mutable.ArrayBuffer[Int]()
 
-    var prerequisitesByClass =
-      prerequisites
-        .groupBy(_(0))
-        .map { case (key, classes) =>
-          val buffer = mutable.ArrayBuffer.from(classes.map(_(1)))
-          (key, buffer)
-        }
+    prerequisites foreach {
+      case Array(node, vertice) =>
+        inDegree(node) += 1
+        graph(vertice) = node :: graph(vertice)
+    }
 
     for (i <- 0 until numCourses) {
-      if (prerequisitesByClass.get(i).isEmpty) {
-        allowedClasses.addOne(i)
+      if (inDegree(i) == 0) {
+        allowedCourses.enqueue(i)
       }
     }
 
-    while (allowedClasses.nonEmpty) {
-      val removedClass = allowedClasses.head
+    while (allowedCourses.nonEmpty) {
+      val removedClass = allowedCourses.dequeue()
       result.addOne(removedClass)
-      allowedClasses.dropInPlace(1)
-
-      prerequisitesByClass foreach {
-        case (key, value) =>
-          value.filterInPlace(x => x != removedClass)
-          if (value.isEmpty) {
-            allowedClasses.addOne(key)
-            prerequisitesByClass -= key
-          }
+      val freedNodes = graph(removedClass)
+      freedNodes.foreach { node =>
+        inDegree(node) -= 1
+        if (inDegree(node) == 0) {
+          allowedCourses.enqueue(node)
+        }
       }
     }
 
-    if (prerequisitesByClass.isEmpty) {
+    if (result.length == numCourses) {
       result.toArray
     } else {
       Array()
