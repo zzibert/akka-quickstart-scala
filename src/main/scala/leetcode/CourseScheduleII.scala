@@ -3,44 +3,43 @@ package leetcode
 import scala.collection.mutable
 
 object Solution {
-  def findOrder(numCourses: Int,
-                prerequisites: Array[Array[Int]]): Array[Int] = {
+  def findOrder(numCourses: Int, prerequisites: Array[Array[Int]]): Array[Int] = {
     val result = mutable.ArrayBuffer[Int]()
+    val allowedClasses = mutable.ArrayBuffer[Int]()
 
     var prerequisitesByClass =
       prerequisites
         .groupBy(_(0))
-        .map {
-          case (key, value) =>
-            val classes = value.map(_(1))
-            (key, classes)
+        .map { case (key, classes) =>
+          val buffer = mutable.ArrayBuffer.from(classes.map(_(1)))
+          (key, buffer)
         }
 
-    // classes without prerequisites
-    for (number <- 0 until numCourses) {
-      if (prerequisitesByClass.get(number).isEmpty) {
-        result.addOne(number)
+    for (i <- 0 until numCourses) {
+      if (prerequisitesByClass.get(i).isEmpty) {
+        allowedClasses.addOne(i)
       }
     }
 
-    var newClass = true
+    while (allowedClasses.nonEmpty) {
+      val removedClass = allowedClasses.head
+      result.addOne(removedClass)
+      allowedClasses.dropInPlace(1)
 
-    while (newClass) {
-      newClass = false
       prerequisitesByClass foreach {
-        case (key, classes) =>
-          if (classes.forall(result.contains)) {
+        case (key, value) =>
+          value.filterInPlace(x => x != removedClass)
+          if (value.isEmpty) {
+            allowedClasses.addOne(key)
             prerequisitesByClass -= key
-            result.addOne(key)
-            newClass = true
           }
       }
     }
 
-    if (result.length == numCourses) {
+    if (prerequisitesByClass.isEmpty) {
       result.toArray
     } else {
-      Array.empty
+      Array()
     }
   }
 }
