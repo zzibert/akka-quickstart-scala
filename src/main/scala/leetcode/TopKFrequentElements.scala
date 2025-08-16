@@ -25,7 +25,6 @@ object Solution {
         case Some(node) =>
           node.amount += 1
           checkForSwap(node)
-//          checkForChildRotation(node)
 
         case None =>
           val node = new Node(key)
@@ -155,23 +154,6 @@ object Solution {
         }
       }
     }
-
-    // Probably useless
-//    def checkForChildRotation(node: Node): Unit = {
-//      node.parentOption foreach { parentNode =>
-//        (parentNode.leftOption, parentNode.rightOption) match {
-//          case (Some(leftChild), Some(rightChild)) =>
-//            if (rightChild.amount > leftChild.amount) {
-//              parentNode.rightOption = Some(leftChild)
-//              parentNode.leftOption = Some(rightChild)
-//            }
-//
-//          case _ =>
-//        }
-//
-//        checkForChildRotation(parentNode)
-//      }
-//    }
   }
 
   def topKFrequent(nums: Array[Int], k: Int): Array[Int] = {
