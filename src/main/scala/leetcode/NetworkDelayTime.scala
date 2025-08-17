@@ -11,8 +11,6 @@ object Solution {
     val minimumTimeToNode = Array.fill(n)(Int.MaxValue)
     minimumTimeToNode(k-1) = 0
 
-    val visited = Array.fill(n)(false)
-
     val destinations =
       times
         .groupBy(_(0))
@@ -25,16 +23,13 @@ object Solution {
 
     while (queue.nonEmpty) {
       val journey = queue.dequeue()
-      visited(journey.to) = true
+
       for {
         journeys <- destinations.get(journey.to)
         Array(to, time) <- journeys
-        if !visited(to)
+        if minimumTimeToNode(to) > journey.time + time
       } {
-        if (minimumTimeToNode(to) > journey.time + time) {
-          minimumTimeToNode(to) = journey.time + time
-        }
-
+        minimumTimeToNode(to) = journey.time + time
         queue.enqueue(Journey(to, journey.time + time))
       }
     }
