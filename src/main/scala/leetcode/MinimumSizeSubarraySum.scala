@@ -1,36 +1,40 @@
 object Solution {
   def minSubArrayLen(target: Int, nums: Array[Int]): Int = {
+    var i = 0
+    var currentSum = 0
     val length = nums.length
-    val leftValue = Array.fill(length+1)(0)
-    var currentValue = 0
-    var size = 1
-    var conditionMet = false
 
-    for (i <- 0 to length) {
-      leftValue(i) = currentValue
-      if (i < length) {
-        currentValue += nums(i)
-      }
+    while (i < length && currentSum < target) {
+      currentSum += nums(i)
+      i += 1
     }
 
-    while (!conditionMet && size <= length) {
-      for (i <- 0 to length-size) {
-        val j = i + size
-        val value = leftValue(j) - leftValue(i)
-        if (value >= target) {
-          conditionMet = true
+    if (currentSum < target) {
+      0
+    } else {
+      var first = 0
+      var last = i // first outside sliding window
+      var slidingWindowSize = last - first
+
+      while (first < length) {
+        while (currentSum - nums(last-1) >= target) {
+          currentSum -= nums(last-1)
+          last -= 1
+          slidingWindowSize = last - first
+        }
+
+        currentSum -= nums(first)
+        first += 1
+        if (currentSum >= target) {
+          slidingWindowSize = last - first
+        } else {
+          if (last != length) {
+            currentSum += nums(last)
+            last += 1
+          }
         }
       }
-
-      if (!conditionMet) {
-        size += 1
-      }
-    }
-
-    if (conditionMet) {
-      size
-    } else {
-      0
+      slidingWindowSize
     }
   }
 }
