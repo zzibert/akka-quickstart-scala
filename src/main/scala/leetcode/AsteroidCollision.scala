@@ -32,11 +32,8 @@ object Solution {
       }
     }
 
-    val result =
-      (rightTravellingAsteroids.toArray ++ leftTravellingAsteroids.toArray)
-        .sortBy(_._1)
-        .map(_._2)
-
-    result
+    (rightTravellingAsteroids.toArray ++ leftTravellingAsteroids.toArray)
+      .sortBy(_._1)
+      .map(_._2)
   }
 }
