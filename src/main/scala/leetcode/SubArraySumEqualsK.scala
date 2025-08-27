@@ -1,19 +1,33 @@
 package leetcode
 
-object SubArraySumEqualsK {
+object Solution {
   def subarraySum(nums: Array[Int], k: Int): Int = {
+    val length = nums.length
+    val sums = Array.fill(length)(0)
+
     var result = 0
+    var currentSum = 0
 
-    var i = nums.length
-
-    while (i > 0) {
-      for (j <- 0 to (nums.length - i)) {
-        val example = nums.drop(j).take(i)
-        if (example.sum == k) {
-          result += 1
-        }
+    for {
+      i <- 0 until length
+      number = nums(i)
+    } {
+      currentSum += number
+      sums(i) = currentSum
+      if (currentSum == k) {
+        result += 1
       }
-      i -= 1
+    }
+
+    for {
+      i <- 0 until length
+      number = nums(i)
+      j <- i+1 until length
+    } {
+      sums(j) -= number
+      if (sums(j) == k) {
+        result += 1
+      }
     }
 
     result

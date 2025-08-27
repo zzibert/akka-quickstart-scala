@@ -1,10 +1,13 @@
 package leetcode
 
+import scala.collection.mutable
+
 object Solution {
   def longestSubarray(nums: Array[Int]): Int = {
     var result = 0
     val length = nums.length
     val numberOfOnes = Array.fill(length)(0)
+    val zeroes = mutable.ListBuffer[Int]()
     var firstOne: Option[Int] = None
     var counter = 0
 
@@ -14,6 +17,8 @@ object Solution {
     } {
       number match {
         case 0 =>
+          zeroes.addOne(i)
+
           firstOne foreach { first =>
             numberOfOnes(first) = counter
             numberOfOnes(i - 1) = counter
@@ -34,13 +39,12 @@ object Solution {
     firstOne foreach { first =>
       numberOfOnes(first) = counter
     }
-    numberOfOnes(length-1) = counter
+    numberOfOnes(length - 1) = counter
 
-    var foundZero = false
+    var foundZero = zeroes.nonEmpty
 
     for {
-      i <- 0 until length
-      number = nums(i) if number == 0
+      i <- zeroes
     } {
       foundZero = true
       var currentResult = 0
